@@ -22,6 +22,33 @@ def plotCurveWithMach(machArray,splines, title, xlabel, ylabel, numOfPoints = 50
     plt.grid()
     plt.show()
 
+def plotCurveWithMachAndTarget(machArray,splines, title, xlabel, ylabel,targetMach, numOfPoints = 500, xMach=True):
+    minMach = machArray[0]
+    maxMach = machArray[-1]
+    step = (maxMach - minMach)/(numOfPoints-1)
+    xArray = []
+    yArray = []
+    
+    for i in range(numOfPoints):
+        xArray.append(minMach + i*step)
+        yArray.append(evaluateSpline(xArray[i], splines))
+        
+    # print(len(xArray), len(yArray))
+    plt.figure()
+    if xMach:
+        plt.plot(xArray, yArray, color='blue', linewidth=2)
+    if not xMach:
+        plt.plot(yArray, xArray, color='blue', linewidth=2)
+    maxY = max(yArray)
+    targetY = [ i for i in range(len(yArray))]
+    targetX = [targetMach]*len(targetY)
+    plt.plot(targetX, targetY, color='red', linewidth=2)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid()
+    plt.show()
+
 
 def plotAllSplines(machArray,splines, numOfPoints = 500):
     pressureSpline = splines['PressureRatio']
