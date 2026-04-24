@@ -1,47 +1,41 @@
 #importing different modules
 from dataIngestion import inputData
-from buildTrigonalMatrix import buildTrigonalMatrix
+from buildTrigonalMatrix import buildTridiagonalMatrix
 from solveMatrixEquation import solveMatrixEquations
 from generateSplineCoefficients import generateSplineCoefficients
-from plotGraph import plotCurveWithMach,plotAllSplines, plotCurveWithMachAndTarget
+from plotGraph import plotCurveWithMach,plotAllSplines, plotCurveWithMachAndTarget, plotCompareSplines
 from evaluateSpline import evaluateSpline
+from lagrangePoly import generateSlopeDicts
+from errorAnalysis import errorAnalysis
 from NR import hybrid_newton_bisection
 
-filepath = "Data\isentropicTables.csv"
+filepath = "Data\isentropic_gas_table.csv"
 title = 'Isentropic Flow: Mach Number vs. Area Ratio'
 xlabel = 'Mach Number'
 ylabel = 'Area Ratio'
-targetMach = 3.55
+targetMach = 1.245
 targetSpline = 'AreaRatio'
+targetProperty = 7
 
 def main():
     data = inputData(filepath)
-    lower,main,upper,rhs = buildTrigonalMatrix(data)
+    slopeStart,slopeEnd = generateSlopeDicts(data)
+    lower,main,upper,rhs = buildTridiagonalMatrix(data,mode='parabolic')
     sol = solveMatrixEquations(lower,main,upper,rhs)
-    splines = generateSplineCoefficients(sol, data)
-    target_area = 100
+    splinesPara = generateSplineCoefficients(sol, data)
 
-    # 1. Subsonic Search: Cage the root strictly between M=0.001 and M=0.999
-    subsonic_mach = hybrid_newton_bisection(
-        target_area, 
-        bound_a=0.001, 
-        bound_b=0.999, 
-        splines=splines['AreaRatio']
-    )
+    lower,main,upper,rhs = buildTridiagonalMatrix(data,mode='natural')
+    sol = solveMatrixEquations(lower,main,upper,rhs)
+    splinesNat = generateSplineCoefficients(sol, data)
+   
+    lower,main,upper,rhs = buildTridiagonalMatrix(data,mode='clamped', slopeStart=slopeStart, slopeEnd=slopeEnd)
+    sol = solveMatrixEquations(lower,main,upper,rhs)
+    splinesHybrid = generateSplineCoefficients(sol, data)
 
-    # 2. Supersonic Search: Cage the root strictly between M=1.001 and your maximum table value
-    supersonic_mach = hybrid_newton_bisection(
-        target_area, 
-        bound_a=1.001, 
-        bound_b=30.0, 
-        splines=splines['AreaRatio']
-    )
+    # plotCompareSplines(machArray=data['Mach'], splines1=splinesPara[targetSpline], splines2=splinesNat[targetSpline], splines3=splinesHybrid[targetSpline],title=title,xlabel=xlabel,ylabel=ylabel)
+    errorAnalysis(data['Mach'],targetSpline,splinesNat,splinesHybrid,splinesPara)
 
-    # Remember to apply rounding ONLY at the very end
-    print(f"Target Area Ratio: {target_area}")
-    if subsonic_mach: print(f"Subsonic M:   {subsonic_mach:.4f}")
-    if supersonic_mach: print(f"Supersonic M: {supersonic_mach:.4f}")
-    print(evaluateSpline(targetMach, splines[targetSpline]))
+    # print(evaluateSpline(targetMach, splines[targetSpline]))
     # plotAllSplines(
     #     machArray=data['Mach'],
     #     splines= splines,
@@ -56,17 +50,16 @@ def main():
     #     numOfPoints=1000,
     #     xMach=True
     #     )
-    plotCurveWithMachAndTarget(
-        machArray=data['Mach'], 
-        splines= splines['AreaRatio'],
-        title = title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        targetMach=targetMach,
-        numOfPoints=1000,
-        xMach=True
-        )
-    #add function to plot curve of mach and target spline, along with the tagret ratio shown as line on the graph
+    # plotCurveWithMachAndTarget(
+    #     machArray=data['Mach'], 
+    #     splines= splines['AreaRatio'],
+    #     title = title,
+    #     xlabel=xlabel,
+    #     ylabel=ylabel,
+    #     targetMach=targetMach,
+    #     numOfPoints=1000,
+    #     xMach=True
+    #     )
     
 
 

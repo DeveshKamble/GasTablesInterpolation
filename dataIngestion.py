@@ -1,12 +1,5 @@
 import csv
 
-#Take file path as the input parameter in string format 
-#Returns a dictionary with array of data corresponding to each header in following format as output
-#data = {
-# 'Mach': [.....]
-# 'PressureRatio':[......]
-#  ......
-#}
 def inputData(path):
     data = {}   
 
@@ -28,9 +21,3 @@ def inputData(path):
             for i in range(len(row)):
                 data[headers[i]].append(float(row[i])) #This adds the data value of that row to the respective header
         return data
-
-
-#Testing
-#print(inputMatrix('Data\inputData.csv'))
-
-
