@@ -8,17 +8,28 @@ from evaluateSpline import evaluateSpline
 from lagrangePoly import generateSlopeDicts
 from errorAnalysis import errorAnalysis
 from NR import hybrid_newton_bisection
+import analyticalSolution as exact
 
-filepath = "Data\isentropic_gas_table.csv"
+filepath = "Data\getThisFile.csv"
 title = 'Isentropic Flow: Mach Number vs. Area Ratio'
 xlabel = 'Mach Number'
 ylabel = 'Area Ratio'
 targetMach = 1.245
-targetSpline = 'AreaRatio'
+targetSpline = 'PressureRatio'
 targetProperty = 7
 
 def main():
-    data = inputData(filepath)
+    minMach, maxMach, numPoints = 0.1, 3.0, 30
+    step = (maxMach - minMach) / (numPoints - 1)
+    machArray = [minMach + i * step for i in range(numPoints)]
+    
+    data = {
+        'Mach': machArray,
+        'PressureRatio': [exact.exactPressureRatio(m) for m in machArray],
+        'DensityRatio': [exact.exactDensityRatio(m) for m in machArray],
+        'TemperatureRatio': [exact.exactTempRatio(m) for m in machArray],
+        'AreaRatio': [exact.exactAreaRatio(m) for m in machArray]
+    }
     slopeStart,slopeEnd = generateSlopeDicts(data)
     lower,main,upper,rhs = buildTridiagonalMatrix(data,mode='parabolic')
     sol = solveMatrixEquations(lower,main,upper,rhs)
@@ -33,7 +44,7 @@ def main():
     splinesHybrid = generateSplineCoefficients(sol, data)
 
     # plotCompareSplines(machArray=data['Mach'], splines1=splinesPara[targetSpline], splines2=splinesNat[targetSpline], splines3=splinesHybrid[targetSpline],title=title,xlabel=xlabel,ylabel=ylabel)
-    errorAnalysis(data['Mach'],targetSpline,splinesNat,splinesHybrid,splinesPara)
+    errorAnalysis(data['Mach'],targetSpline,data,splinesNat,splinesHybrid,splinesPara)
 
     # print(evaluateSpline(targetMach, splines[targetSpline]))
     # plotAllSplines(

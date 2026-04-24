@@ -1,53 +1,27 @@
-import analyticalSolution as exact
-from evaluateSpline import evaluateSpline
+from contendors import splines, getLinearArray, piecewiseCubicLagrange
 import matplotlib.pyplot as plt
-propFunctDict = {
-    'AreaRatio':exact.exactAreaRatio,
-    'PressureRatio':exact.exactPressureRatio,
-    'TempRatio':exact.exactTempRatio,
-    'DensityRatio':exact.exactDensityRatio,
-}
-def errorAnalysis(machArray,targetSpline,splinesNat,splinesHybrid,splinesParabolic, numOfPoints=10000,TOL=1e-15,eps=1e-15):
+
+
+def errorAnalysis(machArray,targetSpline,data,splinesNat,splinesHybrid,splinesParabolic, numOfPoints=10000,eps=1e-16):
     minMach,maxMach = machArray[0], machArray[-1]
     step = (maxMach - minMach)/(numOfPoints-1)
     xArray = []
-    yNatArray, yHybridArray, yParaArray,yExactArray = [], [],[],[]
-    splineNat = splinesNat[targetSpline]
-    splineHybrid = splinesHybrid[targetSpline]
-    splineParabolic = splinesParabolic[targetSpline]
-    exactPropFunction = propFunctDict[targetSpline]
-    errParaArray, errHybridArray, errNatArray = [],[],[]
-
-    
-
-
     for i in range(numOfPoints):
         xArray.append(minMach+i*step)
-        yNatArray.append(evaluateSpline(xArray[i],splineNat))
-        yHybridArray.append(evaluateSpline(xArray[i],splineHybrid))
-        yParaArray.append(evaluateSpline(xArray[i],splineParabolic))
-        yExactArray.append(exactPropFunction(xArray[i]))
-        errNat = abs(yNatArray[i] - yExactArray[i]) +eps
-        errPara = abs(yParaArray[i] - yExactArray[i]) +eps
-        errHybrid = abs(yHybridArray[i] - yExactArray[i]) +eps
-        # if errNat < TOL:
-        #     errNat+=eps
-        # if errPara < TOL:
-        #     errPara+=eps
-        # if errHybrid < TOL:
-        #     errHybrid+=eps
-        errParaArray.append(errPara)
-        errHybridArray.append(errHybrid)
-        errNatArray.append(errNat)
-    
-    fig,ax = plt.subplots(3,1,figsize=(16,12))
-    ax[0].plot(xArray, errNatArray, 'r-', label='Natural Error')
-    ax[1].plot(xArray,errParaArray , 'g-', label='Parabolic Error')
-    ax[2].plot(xArray,errHybridArray, color='yellow', linewidth=2.5, label='Hybrid Clamped')
-    ax[0].grid()
-    ax[0].set_yscale('log')
-    ax[1].set_yscale('log')
-    ax[2].set_yscale('log')
+    errLagrangeArray = piecewiseCubicLagrange(xArray,machArray,targetSpline,data,eps)
+    errLinearArray = getLinearArray(xArray, machArray,targetSpline,data,eps)
+    errNatArray,errParaArray,errHybridArray = splines(xArray, splinesNat, splinesHybrid,splinesParabolic,targetSpline,eps)
+    plt.figure()
+    plt.plot(xArray,errParaArray , 'g-',linewidth=2.5, label='Parabolic Error')
+    plt.plot(xArray, errNatArray, 'r-', linewidth=2,label='Natural Error')
+    plt.plot(xArray,errHybridArray, color='yellow',linewidth=1.5, label='Hybrid Clamped Error')
+    plt.plot(xArray,errLinearArray, color='blue',linewidth=1, label='Linear Error')
+    plt.plot(xArray,errLagrangeArray, color='black',linewidth=0.5, label='Lagrange Error')
+    plt.xlabel('Mach Number')
+    plt.ylabel('Absolute error')
+    plt.yscale('log')
+    plt.grid()
+    plt.legend()
     plt.tight_layout()
     plt.show()
 

@@ -61,11 +61,11 @@ def generate_csv(filename="isentropic_gas_table.csv", m_start=0.1, m_end=3.0, nu
             
             # Write the formatted data (rounding to 6 decimal places for cleanliness)
             writer.writerow([
-                f"{M:.4f}",
-                f"{a_ratio:.6f}",
-                f"{p_ratio:.6f}",
-                f"{t_ratio:.6f}",
-                f"{d_ratio:.6f}"
+                M,
+                a_ratio,
+                p_ratio,
+                t_ratio,
+                d_ratio
             ])
             
     print(f"Success! Generated {num_points} rows of isentropic data in '{filename}'.")
@@ -75,7 +75,7 @@ def generate_csv(filename="isentropic_gas_table.csv", m_start=0.1, m_end=3.0, nu
 # =============================================================================
 if __name__ == "__main__":
     # You can change the start, end, and number of points here
-    generate_csv(filename="Data\isentropic_gas_table.csv", m_start=0.1, m_end=3.0, num_points=100)
+    generate_csv(filename="Data\getThisFile.csv", m_start=0.1, m_end=3.0, num_points=100)
     
     # Example for generating a high-density table:
     # generate_csv("dense_gas_table.csv", 0.01, 30.0, 700)
