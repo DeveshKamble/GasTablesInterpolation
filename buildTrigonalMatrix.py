@@ -1,4 +1,3 @@
-
 def calculateStep(data):
     h = []
     machArray = data['Mach']
@@ -11,7 +10,8 @@ def calculateStep(data):
     return h
 
 
-#takes input as the data dictionary 
+#takes input as the data dictionary, mode = ['parabolic','clamped', 'natural']
+#if mode is clamped requires slopeStart and slopeEnd
 #output is the lower, main and upper diagonal of the triagonal matrix 
 #along with the right hand side of all the independent parameters
 def buildTridiagonalMatrix(data,mode = 'parabolic', slopeStart=None, slopeEnd=None):
@@ -25,13 +25,9 @@ def buildTridiagonalMatrix(data,mode = 'parabolic', slopeStart=None, slopeEnd=No
 
     if mode == 'parabolic':
         #we do not know the slopes at the start and the end thus we cannot use clamped cubic splines
-        #however using natural cubic spline may give arbitrary results 
-        #we are using parabolic approximation at the boundaries
-
-        # M0 = M1 giving parabolic approximation as d = (M1-M0)/6h[0]
+        # M0 = M1 giving parabolic approximation 
         main[0] = 1
         upper[0] = -1
-
         # M(n-2) = M(n-1)
         main[n-1] = 1
         lower[n-1] = -1
@@ -67,10 +63,11 @@ def buildTridiagonalMatrix(data,mode = 'parabolic', slopeStart=None, slopeEnd=No
     dataIndependant.pop('Mach')
     # print(dataIndependant.keys())
     #generating the rhs for each of the dependant parameters
-    for header, values in dataIndependant.items(): #This has constant items(5) so overall this function implements in O(n) time complexity
+    for header, values in dataIndependant.items(): 
+        #This has constant items(5) so overall this function implements in O(n) time complexity
         tempRhs = [0]*n
 
-        for i in range(1,n-1): #the calue of tempPhs at i=0 and n-1 must be 0 because of parabolic approximation at the ends
+        for i in range(1,n-1): #the calue of tempPhs at i=0 and n-1 must be 0 because of parabolic and natural approximation at the ends
             tempRhs[i] = 6.0*( (values[i+1]-values[i])/h[i] - (values[i] - values[i-1])/h[i-1] )
         if mode == "clamped":
             # For clamped, we use the slopes (either analytical or Lagrange-estimated)

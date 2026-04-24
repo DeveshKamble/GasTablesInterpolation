@@ -10,12 +10,8 @@ from errorAnalysis import errorAnalysis
 from NR import hybrid_newton_bisection
 import analyticalSolution as exact
 
-filepath = "Data\getThisFile.csv"
-title = 'Isentropic Flow: Mach Number vs. Area Ratio'
-xlabel = 'Mach Number'
-ylabel = 'Area Ratio'
 targetMach = 1.245
-targetSpline = 'PressureRatio'
+targetSpline = 'AreaRatio'
 targetProperty = 7
 
 def main():
@@ -43,34 +39,6 @@ def main():
     sol = solveMatrixEquations(lower,main,upper,rhs)
     splinesHybrid = generateSplineCoefficients(sol, data)
 
-    # plotCompareSplines(machArray=data['Mach'], splines1=splinesPara[targetSpline], splines2=splinesNat[targetSpline], splines3=splinesHybrid[targetSpline],title=title,xlabel=xlabel,ylabel=ylabel)
-    errorAnalysis(data['Mach'],targetSpline,data,splinesNat,splinesHybrid,splinesPara)
-
-    # print(evaluateSpline(targetMach, splines[targetSpline]))
-    # plotAllSplines(
-    #     machArray=data['Mach'],
-    #     splines= splines,
-    #     numOfPoints=1000
-    # )
-    # plotCurveWithMach(
-    #     machArray=data['Mach'], 
-    #     splines= splines['AreaRatio'],
-    #     title = title,
-    #     xlabel=xlabel,
-    #     ylabel=ylabel,
-    #     numOfPoints=1000,
-    #     xMach=True
-    #     )
-    # plotCurveWithMachAndTarget(
-    #     machArray=data['Mach'], 
-    #     splines= splines['AreaRatio'],
-    #     title = title,
-    #     xlabel=xlabel,
-    #     ylabel=ylabel,
-    #     targetMach=targetMach,
-    #     numOfPoints=1000,
-    #     xMach=True
-    #     )
     
 
 
