@@ -7,7 +7,7 @@ from plotGraph import plotCurveWithMach,plotAllSplines, plotCurveWithMachAndTarg
 from evaluateSpline import evaluateSpline
 from lagrangePoly import generateSlopeDicts
 from errorAnalysis import errorAnalysis
-from NR import hybrid_newton_bisection
+from NR import hybridNewtonBisection
 import analyticalSolution as exact
 
 targetMach = 1.245
